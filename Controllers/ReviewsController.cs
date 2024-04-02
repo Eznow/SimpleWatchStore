@@ -57,7 +57,7 @@ namespace BaiTapLon.Controllers
                         Comment = review.Comment,
                     };
 
-                    return Json(new { username = user.Username, comment = review.Comment, starRating = newRating?.StarRating, averageStarRating = watch.AverageStarRating }); // Sửa ở đây
+                    return Json(new { username = user.Username, comment = review.Comment, starRating = newRating?.StarRating, averageStarRating = watch.AverageStarRating }); 
                 }
                 else
                 {
