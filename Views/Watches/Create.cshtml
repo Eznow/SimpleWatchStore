@@ -1,0 +1,69 @@
+﻿@model BaiTapLon.Models.Watch
+
+@{
+    ViewData["Title"] = "Create Watch";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Create New Watch</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="/Watches/Create" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <input type="text" class="form-control" id="name" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="brand">Brand:</label>
+                            <input type="text" class="form-control" id="brand" name="Brand" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <textarea class="form-control" id="description" name="Description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price:</label>
+                            <input type="number" class="form-control" id="price" name="Price" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="stockQuantity">Stock Quantity:</label>
+                            <input type="number" class="form-control" id="stockQuantity" name="StockQuantity" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Image</label>
+                            <input type="file" name="imageFile" class="form-control" required />
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                            <a href="/Watches/Index" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $('form').on('submit', function (event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+        $.ajax({
+            url: '/Watches/Create',
+            type: 'POST',
+            data: formData,
+            processData: false,  
+            contentType: false,  
+            success: function () {
+                alert("Watch created successfully!");
+            }
+        });
+    });
+
+</script>

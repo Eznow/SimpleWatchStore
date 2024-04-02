@@ -1,0 +1,29 @@
+﻿@model User
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">ĐĂNG NHẬP</h2>
+                    <form action="/Users/Login" method="post" class="form-signin">
+                        <div class="form-group mb-3">
+                            <label for="username" class="sr-only">Tên tài khoản:</label>
+                            <input type="text" id="username" name="username" class="form-control" placeholder="Tên tài khoản" required autofocus>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="password" class="sr-only">Mật khẩu:</label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Mật khẩu" required>
+                        </div>
+                        <div class="form-group mt-3">
+                            <button class="btn btn-lg btn-primary btn-block" type="submit">Đăng Nhập</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small>Chưa có tài khoản? <a href="/Users/Register">Đăng ký tại đây</a>.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

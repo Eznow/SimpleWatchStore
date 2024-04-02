@@ -1,0 +1,162 @@
+﻿@model BaiTapLon.Models.Watch
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@Model.ImagePath" alt="@Model.Name" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h2>@Model.Name</h2>
+            <p class="text-muted">Hãng: @Model.Brand</p>
+            <p>@Model.Description</p>
+            <p class="text-primary">Giá tiền: $@Model.Price</p>
+            @* Hiển thị số lượng trong kho nếu người dùng đăng nhập với quyền Admin *@
+            @if (User.IsInRole("Admin"))
+            {
+                <p class="text-secondary">Số lượng trong kho: @Model.StockQuantity</p>
+            }
+            @* Hiển thị trạng thái còn hàng hoặc hết hàng nếu người dùng không phải là Admin *@
+            else
+            {
+                <p class="text-secondary">Trạng thái: @(@Model.StockQuantity > 0 ? "Còn hàng" : "Hết hàng")</p>
+            }
+            @* Hiển thị trung bình đánh giá sao, nếu có *@
+            <p class="text-muted" id="averageRating">Trung bình được đánh giá: @(Model.AverageStarRating > 0 ? @Model.AverageStarRating : "Chưa có đánh giá") <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>
+            @if (User.IsInRole("Admin"))
+            {
+                <a href="/Watches/Edit/@Model.WatchID" class="btn btn-warning">Chỉnh sửa</a>
+            }
+            @* Hiển thị trạng thái còn hàng hoặc hết hàng nếu người dùng không phải là Admin *@
+            else if(User.IsInRole("Customer"))
+            {
+                <button class="btn btn-primary" onclick="addToCart(@Model.WatchID)">Thêm vào giỏ hàng</button>
+            } else
+            {
+                <a href="/users/login" class="font-weight-bold">Vui lòng đăng nhập tài khoản để có thể mua hàng, đánh giá và bình luận</a>
+            }
+            @* Hiển thị form để người dùng có thể bình luận nếu đăng nhập *@
+            @if (User.Identity.IsAuthenticated)
+            {
+                <!-- Hiển thị form để người dùng có thể bình luận -->
+                <form id="commentForm" action="/Reviews/Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="WatchID" value="@Model.WatchID">
+                    <input type="hidden" name="Username" value="@User.Identity.Name"> <!-- Thêm dòng này để gửi Username -->
+                    @* Hiển thị ô nhập đánh giá sao nếu người dùng là Customer và chưa đánh giá sao cho sản phẩm này *@
+                    @if (User.IsInRole("Customer") && !ViewBag.HasRated)
+                    {
+                        <div class="form-group">
+                            <label for="StarRating">Đánh giá sản phẩm:</label>
+                            <input type="number" id="StarRating" name="StarRating" class="form-control" min="1" max="5" placeholder="Điểm đánh giá từ 1 đến 5">
+                            <div class="invalid-feedback">Vui lòng nhập đánh giá từ 1 đến 5.</div>
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label for="Comment">Bình luận:</label>
+                        <textarea id="Comment" name="Comment" class="form-control" rows="4" required></textarea>
+                        <div class="invalid-feedback">Vui lòng nhập nội dung bình luận.</div>
+                    </div>
+                    <input type="submit" value="Xác nhận" class="btn btn-success mt-2">
+                </form>
+            }
+        </div>
+        <div class="comments mt-4">
+            @* Lặp qua tất cả các đánh giá của sản phẩm và hiển thị chúng *@
+            @foreach (var review in Model.Reviews)
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">@review.User.Username</h5>
+                        @* Kiểm tra xem người dùng đã đánh giá sao cho sản phẩm này chưa *@
+                        @if (Model.Ratings.Any(r => r.UserID == review.User.UserID))
+                        {
+                            // Lấy đánh giá sao của người dùng cho sản phẩm
+                            var rating = Model.Ratings.First(r => r.UserID == review.User.UserID);
+                            <p class="card-text">Đã đánh giá @rating.StarRating <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>
+                        }
+                        else
+                        {
+                            <p class="card-text">Chưa đánh giá <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>
+                        }
+                        <p class="card-text">Bình luận: @review.Comment</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    // Xử lý sự kiện khi người dùng gửi bình luận
+    $('#commentForm').submit(function (e) {
+        e.preventDefault();
+
+        var data = $(this).serializeArray();
+        var starRating = $('#StarRating').val(); // Lấy giá trị của StarRating từ form
+
+        if (starRating == '') {
+            data = data.filter(function (item) { return item.name !== 'StarRating'; });
+        }
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: $.param(data),
+            success: function (data) {
+                var username = data.username;
+                var comment = data.comment;
+                var star = data.averageStarRating;
+
+                var newComment = '<div class="card mb-3">' +
+                    '<div class="card-body">' +
+                    '<h5 class="card-title">' + username + '</h5>';
+
+                if (starRating) {
+                    newComment += '<p class="card-text">Đã đánh giá ' + starRating + '  <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>';
+                } else {
+                    newComment += '<p class="card-text">Chưa đánh giá <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>';
+                }
+                newComment += '<p class="card-text">Bình luận: ' + comment + '</p>';
+
+                newComment += '</div>' +
+                    '</div>';
+
+                var $newComment = $(newComment);
+                $('.comments').append($newComment);
+
+                $newComment.hide().fadeIn();
+
+              
+                $('#averageRating').html('Trung bình được đánh giá: ' + star + ' <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i>');
+            },
+            error: function () {
+                alert('Có lỗi xảy ra khi gửi bình luận.');
+            }
+        });
+    });
+
+
+
+    function addToCart(id) {
+        $.ajax({
+            url: '/Carts/AddToCart',
+            type: 'POST',
+            data: { id: id },
+            success: function (response) {
+                if (response.success) {
+                    alert('Sản phẩm đã được thêm vào giỏ hàng');
+                } else {
+                    alert(response.message); // Hiển thị thông báo từ server
+                    if (response.redirectToUrl) {
+                        window.location.href = response.redirectToUrl;
+                    }
+                }
+            },
+            error: function (error) {
+                alert('Có lỗi xảy ra');
+            }
+        });
+    }
+
+</script>

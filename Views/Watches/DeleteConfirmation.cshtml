@@ -1,0 +1,54 @@
+﻿@model Watch
+
+<div>
+    <h4>Xác nhận xóa sản phẩm</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Ảnh của sản phẩm:
+        </dt>
+        <dd class="col-sm-10">
+            <img src="@Model.ImagePath" alt="@Model.Name" style="max-width: 200px; max-height: 200px;" />
+        </dd>
+        <dt class="col-sm-2">
+            Tên sản phẩm:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt class="col-sm-2">
+            Hãng:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Brand)
+        </dd>
+
+        <dt class="col-sm-2">
+            Mô tả:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt class="col-sm-2">
+            Giá:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+
+        <dt class="col-sm-2">
+            Số lượng trong kho:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StockQuantity)
+        </dd>
+
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.WatchID" method="post">
+        <input type="submit" value="Xóa" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>

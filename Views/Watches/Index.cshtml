@@ -1,0 +1,74 @@
+﻿@model List<Watch>
+
+<style>
+    .search-form {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1);
+        margin-bottom: 20px; 
+    }
+
+    .search-form .form-control {
+        border: none;
+        border-radius: 5px;
+        box-shadow: none;
+    }
+
+    .search-form button {
+        border-radius: 0 5px 5px 0;
+    }
+</style>
+
+@{
+    var message = TempData["Message"] as string;
+    if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert alert-success">
+            @message
+        </div>
+    }
+}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <form action="/Watches/Search" method="get" class="search-form">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="searchTerm" placeholder="Tìm kiếm theo tên hoặc hãng của đồng hồ">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var watch in Model)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <img src="@watch.ImagePath" class="card-img-top" alt="@watch.Name" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">@watch.Name</h5>
+                        <p class="card-text">@watch.Description</p>
+                        @if (watch.AverageStarRating > 0)
+                        {
+                            <p class="card-text">Số sao trung bình: @watch.AverageStarRating <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>
+                        }
+                        else
+                        {
+                            <p class="card-text">Chưa có lượt đánh giá <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i> nào</p>
+                        }
+                        <div class="d-flex justify-content-between">
+                            <a href="/Watches/Details/@watch.WatchID" class="btn btn-primary">Xem Chi Tiết</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a href="/Watches/DeleteConfirmation/@watch.WatchID" class="btn btn-danger ml-auto">Xóa</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

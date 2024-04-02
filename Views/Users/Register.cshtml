@@ -1,0 +1,67 @@
+﻿@model BaiTapLon.Models.User
+
+@using (Html.BeginForm("Register", "Users", FormMethod.Post, new { id = "registerForm", @class = "form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">ĐĂNG KÝ</h2>
+
+                        <div class="form-group mb-3">
+                            @Html.LabelFor(m => m.Username, "Tên tài khoản", new { @class = "control-label" })
+                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", required = "required", autofocus = "autofocus" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.LabelFor(m => m.Password, "Mật khẩu", new { @class = "control-label" })
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", required = "required" })
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary btn-block">Đăng Ký</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <small>Đã có tài khoản? <a href="/Users/Login">Đăng nhập tại đây</a>.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#registerForm").submit(function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var url = form.attr('action');
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: form.serialize(),
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                success: function (data) {
+                    alert(data); // Hiển thị thông báo từ server
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.responseText) {
+                        alert(jqXHR.responseText); // Hiển thị thông báo từ server
+                    } else {
+                        alert("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+                    }
+                }
+            });
+        });
+    });
+
+</script>

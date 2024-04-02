@@ -1,0 +1,104 @@
+﻿@model Cart
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Giỏ hàng của bạn</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model?.CartItems != null && Model.CartItems.Any())
+                    {
+                        foreach (var item in Model.CartItems)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <img src="@item.Watch.ImagePath" alt="Hình ảnh sản phẩm" class="img-fluid">
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>@item.Watch.Name</h5>
+                                    <p class="mb-1"><strong>Mô tả:</strong> @item.Watch.Description</p>
+                                    <p class="mb-1"><strong>Hãng:</strong> @item.Watch.Brand</p>
+                                    <p class="mb-1"><strong>Giá tiền:</strong> $<span data-cartitem-id="@item.CartItemID" id="price@(@item.CartItemID)">@item.Watch.Price</span></p>
+
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <p class="mb-1"><strong>Số lượng tồn kho:</strong> @item.Watch.StockQuantity</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="mb-1"><strong>Trạng thái:</strong> @(@item.Watch.StockQuantity > 0 ? "Còn hàng" : "Hết hàng")</p>
+                                    }
+                                    <p class="mb-1"><strong>Số lượng tồn kho:</strong> @item.Watch.StockQuantity</p>
+                                    <p class="mb-1"><strong>Số lượng muốn mua: </strong></p><input type="number" id="quantity@item.CartItemID" min="1" max="@item.Watch.StockQuantity" value="@item.Quantity">
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <button class="btn btn-primary btn-block" onclick="confirmBuy(@item.CartItemID, document.getElementById('quantity@item.CartItemID')?.value)">Mua</button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button class="btn btn-danger btn-block" onclick="confirmRemoveFromCart(@item.CartItemID)">Xóa khỏi giỏ hàng</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>Hiện giỏ hàng của bạn không có sản phẩm nào.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function confirmBuy(cartItemId, quantity) {
+        var priceElement = document.getElementById('price' + cartItemId);
+        if (priceElement) {
+            var price = priceElement.innerText;
+            var total = quantity * price;
+            if (confirm('Bạn có chắc chắn muốn mua sản phẩm này với tổng số tiền là $' + total + ' không?')) {
+                $.ajax({
+                    url: '/Carts/Buy',
+                    type: 'POST',
+                    data: { id: cartItemId, quantity: quantity },
+                    success: function (response) {
+                        alert(response.message);
+                        if (response.success) {
+                            location.reload();
+                        }
+                    },
+                    error: function (error) {
+                        alert('Có lỗi xảy ra');
+                    }
+                });
+            }
+        }
+    }
+
+    function confirmRemoveFromCart(cartItemId) {
+        if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng không?')) {
+            $.ajax({
+                url: '/Carts/RemoveFromCart',
+                type: 'POST',
+                data: { id: cartItemId },
+                success: function (response) {
+                    alert(response.message);
+                    if (response.success) {
+                        location.reload();
+                    }
+                },
+                error: function (error) {
+                    alert('Có lỗi xảy ra');
+                }
+            });
+        }
+    }
+</script>
