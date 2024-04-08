@@ -1,5 +1,8 @@
 ﻿@model BaiTapLon.Models.Watch
 
+<head>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
 <div class="container">
     <div class="row">
         <div class="col-md-6">
@@ -25,6 +28,7 @@
             @if (User.IsInRole("Admin"))
             {
                 <a href="/Watches/Edit/@Model.WatchID" class="btn btn-warning">Chỉnh sửa</a>
+                <a href="/Watches/DeleteConfirmation/@Model.WatchID" class="btn btn-danger ml-auto">Xóa</a>
             }
             @* Hiển thị trạng thái còn hàng hoặc hết hàng nếu người dùng không phải là Admin *@
             else if(User.IsInRole("Customer"))
@@ -64,7 +68,7 @@
             @* Lặp qua tất cả các đánh giá của sản phẩm và hiển thị chúng *@
             @foreach (var review in Model.Reviews)
             {
-                <div class="card mb-3">
+                <div class="card mb-3" id="review_@review.ReviewID">
                     <div class="card-body">
                         <h5 class="card-title">@review.User.Username</h5>
                         @* Kiểm tra xem người dùng đã đánh giá sao cho sản phẩm này chưa *@
@@ -80,6 +84,15 @@
                         }
                         <p class="card-text">Bình luận: @review.Comment</p>
                     </div>
+                    @* Nút Xóa *@
+                    @if (User.IsInRole("Admin") || User.Identity.Name == review.User.Username)
+                    {
+                        <form id="deleteForm_@review.ReviewID" action="/Reviews/Delete" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@review.ReviewID" />
+                            <button type="button" class="btn btn-danger float-right" onclick="confirmDelete(@review.ReviewID)"><i class="fas fa-times"></i> Xóa</button>
+                        </form>
+                    }
                 </div>
             }
         </div>
@@ -158,5 +171,14 @@
             }
         });
     }
+
+    function confirmDelete(id) {
+        var result = confirm("Bạn có chắc chắn muốn xóa đánh giá này?");
+        if (result) {
+            $('#deleteForm_' + id).submit();
+        }
+    }
+
+   
 
 </script>

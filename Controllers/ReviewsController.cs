@@ -1,4 +1,5 @@
 ﻿using BaiTapLon.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -68,13 +69,42 @@ namespace BaiTapLon.Controllers
             return View(review);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review == null)
+            {
+                return NotFound();
+            }
 
+            _context.Reviews.Remove(review);
+            await _context.SaveChangesAsync();
 
+            // Lấy WatchID của sản phẩm mà review này thuộc về
+            var watchId = review.WatchID;
 
+            // Chuyển hướng về trang chi tiết sản phẩm
+            return RedirectToAction("Details", "Watches", new { id = watchId });
+        }
 
+        // Action để hiển thị form chỉnh sửa đánh giá
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            var review = await _context.Reviews.FindAsync(id);
+            if (review == null)
+            {
+                return NotFound();
+            }
 
-
+            return View(review);
+        }
 
     }
 }

@@ -9,37 +9,37 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="text-center">Create New Watch</h2>
+                    <h2 class="text-center">Thêm đồng hồ mới</h2>
                 </div>
                 <div class="card-body">
                     <form asp-action="/Watches/Create" method="post" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="name">Name:</label>
+                            <label for="name">Tên:</label>
                             <input type="text" class="form-control" id="name" name="Name" required>
                         </div>
                         <div class="form-group">
-                            <label for="brand">Brand:</label>
+                            <label for="brand">Hãng:</label>
                             <input type="text" class="form-control" id="brand" name="Brand" required>
                         </div>
                         <div class="form-group">
-                            <label for="description">Description:</label>
+                            <label for="description">Mô tả:</label>
                             <textarea class="form-control" id="description" name="Description" rows="3" required></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="price">Price:</label>
+                            <label for="price">Giá:</label>
                             <input type="number" class="form-control" id="price" name="Price" step="0.01" required>
                         </div>
                         <div class="form-group">
-                            <label for="stockQuantity">Stock Quantity:</label>
+                            <label for="stockQuantity">Lượng hàng tồn kho:</label>
                             <input type="number" class="form-control" id="stockQuantity" name="StockQuantity" required>
                         </div>
                         <div class="form-group">
-                            <label class="control-label">Image</label>
+                            <label class="control-label">Ảnh minh họa</label>
                             <input type="file" name="imageFile" class="form-control" required />
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Create</button>
-                            <a href="/Watches/Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Tạo</button>
+                            <a href="/Watches/Index" class="btn btn-secondary">Hủy</a>
                         </div>
                     </form>
                 </div>
@@ -61,7 +61,7 @@
             processData: false,  
             contentType: false,  
             success: function () {
-                alert("Watch created successfully!");
+                alert("Thêm đồng hồ mới thành công!");
             }
         });
     });
