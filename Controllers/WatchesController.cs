@@ -163,18 +163,19 @@ namespace BaiTapLon.Controllers
             {
                 // Trường tìm kiếm rỗng, hiển thị tất cả sản phẩm
                 return RedirectToAction(nameof(Index));
-
             }
             else
             {
                 // Tìm kiếm theo từ khóa nhập vào
                 var watches = await _context.Watches
-                    .Where(w => w.Name.Contains(searchTerm))
+                    .Include(w => w.WatchStatus)
+                    .Where(w => w.Name.ToLower().Contains(searchTerm.ToLower()) || w.Brand.ToLower().Contains(searchTerm.ToLower()))
                     .ToListAsync();
 
                 return View("Index", watches);
             }
         }
+
 
 
         // GET: Watches/Edit/5
