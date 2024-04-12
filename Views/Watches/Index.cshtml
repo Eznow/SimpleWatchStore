@@ -45,6 +45,8 @@
     <div class="row">
         @foreach (var watch in Model)
         {
+            if (watch.WatchStatus != null && watch.WatchStatus.Enable)
+            {
             <div class="col-md-3 mb-4">
                 <div class="card">
                     <img src="@watch.ImagePath" class="card-img-top" alt="@watch.Name" style="height: 200px; object-fit: cover;">
@@ -63,12 +65,14 @@
                             <a href="/Watches/Details/@watch.WatchID" class="btn btn-primary">Xem Chi Tiết</a>
                             @if (User.IsInRole("Admin"))
                             {
+                                <a href="/Watches/Edit/@watch.WatchID" class="btn btn-warning">Chỉnh sửa</a>
                                 <a href="/Watches/DeleteConfirmation/@watch.WatchID" class="btn btn-danger ml-auto">Xóa</a>
                             }
                         </div>
                     </div>
                 </div>
             </div>
+            }
         }
     </div>
 </div>

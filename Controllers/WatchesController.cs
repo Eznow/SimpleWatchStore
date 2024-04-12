@@ -18,7 +18,7 @@ namespace BaiTapLon.Controllers
         // GET: Watches
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Watches.ToListAsync());
+            return View(await _context.Watches.Include(w => w.WatchStatus).ToListAsync());
         }
 
         // GET: Watches/Details/5
@@ -30,6 +30,7 @@ namespace BaiTapLon.Controllers
             }
 
             var watch = await _context.Watches
+                .Include(w => w.WatchStatus)
                 .Include(w => w.Reviews)
                 .ThenInclude(r => r.User)
                 .Include(w => w.Ratings)
@@ -93,7 +94,11 @@ namespace BaiTapLon.Controllers
                 }
 
                 _context.Watches.Add(watch);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
+
+                var watchStatus = new WatchStatus { WatchID = watch.WatchID, Enable = true };
+                _context.WatchStatuses.Add(watchStatus);
+                await _context.SaveChangesAsync();
 
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
@@ -134,12 +139,14 @@ namespace BaiTapLon.Controllers
             var relatedCartItems = _context.CartItems.Where(ci => ci.WatchID == id);
             var relatedReviews = _context.Reviews.Where(rv => rv.WatchID == id);
             var relatedRatings = _context.Ratings.Where(rt => rt.WatchID == id);
+            var relatedStatuses = _context.WatchStatuses.Where(ws => ws.WatchID == id);
 
 
             // Xóa tất cả các mục giỏ hàng liên quan
             _context.CartItems.RemoveRange(relatedCartItems);
             _context.Reviews.RemoveRange(relatedReviews);
             _context.Ratings.RemoveRange(relatedRatings);
+            _context.WatchStatuses.RemoveRange(relatedStatuses);
 
             // Xóa sản phẩm
             _context.Watches.Remove(watch);
@@ -227,6 +234,21 @@ namespace BaiTapLon.Controllers
         private bool WatchExists(int id)
         {
             return _context.Watches.Any(e => e.WatchID == id);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleEnable(int id)
+        {
+            var watchStatus = await _context.WatchStatuses.FindAsync(id);
+            if (watchStatus == null)
+            {
+                return NotFound();
+            }
+
+            watchStatus.Enable = !watchStatus.Enable;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
 

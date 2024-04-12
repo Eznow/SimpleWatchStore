@@ -17,8 +17,11 @@ namespace BaiTapLon
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Rating> Ratings { get; set; }
 
+        public DbSet<WatchStatus> WatchStatuses { get; set; }
+
 
     }
+
 
 }
 

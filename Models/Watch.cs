@@ -23,5 +23,7 @@ namespace BaiTapLon.Models
         public virtual ICollection<Rating> Ratings { get; set; }
         [ValidateNever]
         public virtual ICollection<CartItem> CartItems { get; set; }
+        [ValidateNever]
+        public WatchStatus WatchStatus { get; set; }
     }
 }

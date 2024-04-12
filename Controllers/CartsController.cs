@@ -25,7 +25,9 @@ namespace BaiTapLon.Controllers
                 return RedirectToAction("Logout", "Users");
             }
             var user = _context.Users.FirstOrDefault(u => u.Username == username);
-            var cart = await _context.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.Watch).FirstOrDefaultAsync(c => c.UserID == user.UserID && c.PurchaseDate == null);
+            var cart = await _context.Carts.Include(c => c.CartItems)
+                .ThenInclude(ci => ci.Watch)
+                .FirstOrDefaultAsync(c => c.UserID == user.UserID && c.PurchaseDate == null);
             return View(cart);
         }
 
@@ -111,6 +113,35 @@ namespace BaiTapLon.Controllers
 
             return Json(new { success = true, message = "Bạn đã mua sản phẩm thành công" });
         }
+
+        // GET: Carts/Search
+        public async Task<IActionResult> Search(string searchTerm)
+        {
+            var username = HttpContext.Session.GetString("Username");
+            if (username == null)
+            {
+                TempData["ErrorMessage"] = "Bạn đã hết phiên đăng nhập. Vui lòng đăng nhập lại để xem giỏ hàng của mình.";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
+                return RedirectToAction("Logout", "Users");
+            }
+
+            var cartItems = _context.CartItems
+                .Include(c => c.Watch)
+                .Include(c => c.Cart)
+                .Where(c => c.Cart.UserID == user.UserID &&
+                            (c.Watch.Name.Contains(searchTerm) ||
+                             c.Watch.Brand.Contains(searchTerm)));
+
+            return View(cartItems);
+        }
+
+
 
     }
 

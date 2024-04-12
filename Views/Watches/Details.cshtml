@@ -27,11 +27,14 @@
             <p class="text-muted" id="averageRating">Trung bình được đánh giá: @(Model.AverageStarRating > 0 ? @Model.AverageStarRating : "Chưa có đánh giá") <i class="fa-solid fa-star" style="color: yellow; text-shadow: 0 0 1px black, 0 0 1px black, 0 0 2px black;"></i></p>
             @if (User.IsInRole("Admin"))
             {
-                <a href="/Watches/Edit/@Model.WatchID" class="btn btn-warning">Chỉnh sửa</a>
-                <a href="/Watches/DeleteConfirmation/@Model.WatchID" class="btn btn-danger ml-auto">Xóa</a>
+                <a href="/Watches/Edit/@Model.WatchID" class="btn btn-warning @(!Model.WatchStatus.Enable ? "disabled" : "")">Chỉnh sửa</a>
+                <a href="/Watches/DeleteConfirmation/@Model.WatchID" class="btn btn-danger ml-auto @(!Model.WatchStatus.Enable ? "disabled" : "")">Xóa</a>
+
+                <button id="toggleEnableButton" style="display:none" class="btn btn-secondary ml-2" data-watch-id="@Model.WatchID">@(@Model.WatchStatus.Enable ? "Disable" : "Enable")</button>
             }
+
             @* Hiển thị trạng thái còn hàng hoặc hết hàng nếu người dùng không phải là Admin *@
-            else if(User.IsInRole("Customer"))
+            else if (User.IsInRole("Customer") && @Model.WatchStatus.Enable)
             {
                 <button class="btn btn-primary" onclick="addToCart(@Model.WatchID)">Thêm vào giỏ hàng</button>
             } else
@@ -39,13 +42,13 @@
                 <a href="/users/login" class="font-weight-bold">Vui lòng đăng nhập tài khoản để có thể mua hàng, đánh giá và bình luận</a>
             }
             @* Hiển thị form để người dùng có thể bình luận nếu đăng nhập *@
-            @if (User.Identity.IsAuthenticated)
+            @if (User.Identity.IsAuthenticated && @Model.WatchStatus.Enable)
             {
                 <!-- Hiển thị form để người dùng có thể bình luận -->
                 <form id="commentForm" action="/Reviews/Create" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="WatchID" value="@Model.WatchID">
-                    <input type="hidden" name="Username" value="@User.Identity.Name"> <!-- Thêm dòng này để gửi Username -->
+                    <input type="hidden" name="Username" value="@User.Identity.Name"> 
                     @* Hiển thị ô nhập đánh giá sao nếu người dùng là Customer và chưa đánh giá sao cho sản phẩm này *@
                     @if (User.IsInRole("Customer") && !ViewBag.HasRated)
                     {
@@ -60,7 +63,7 @@
                         <textarea id="Comment" name="Comment" class="form-control" rows="4" required></textarea>
                         <div class="invalid-feedback">Vui lòng nhập nội dung bình luận.</div>
                     </div>
-                    <input type="submit" value="Xác nhận" class="btn btn-success mt-2">
+                    <input type="submit" value="Xác nhận" class="btn btn-success mt-2 @(!Model.WatchStatus.Enable ? "disabled" : "")">
                 </form>
             }
         </div>
@@ -173,12 +176,34 @@
     }
 
     function confirmDelete(id) {
-        var result = confirm("Bạn có chắc chắn muốn xóa đánh giá này?");
+        var result = confirm("Bạn có chắc chắn muốn xóa bình luận này?");
         if (result) {
             $('#deleteForm_' + id).submit();
         }
     }
 
    
+    $(document).ready(function () {
+        $('#toggleEnableButton').click(function () {
+            var button = $(this);
+            var watchId = button.data('watch-id');
+
+            $.post('/Watches/ToggleEnable', { id: watchId })
+                .done(function () {
+                    // Đảo ngược trạng thái của nút
+                    var enable = button.text() === 'Enable';
+                    button.text(enable ? 'Disable' : 'Enable');
+
+                    // Cập nhật trạng thái của các nút khác
+                    var otherButtons = $('.btn-warning, .btn-danger, .btn-success');
+                    var currentDisabledState = otherButtons.first().hasClass('disabled');
+                    otherButtons.toggleClass('disabled', !currentDisabledState);
+                })
+                .fail(function () {
+                    alert('Có lỗi xảy ra khi thay đổi trạng thái của đồng hồ.');
+                });
+        });
+    });
+
 
 </script>

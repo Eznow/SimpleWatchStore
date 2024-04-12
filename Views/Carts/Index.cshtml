@@ -7,6 +7,11 @@
                 <div class="card-header bg-primary text-white">
                     <h4>Giỏ hàng của bạn</h4>
                 </div>
+                <form method="get" action="@Url.Action("Search", "Carts")">
+                    <input type="text" name="searchTerm" placeholder="Tìm kiếm sản phẩm..." />
+                    <button type="submit">Tìm kiếm</button>
+                </form>
+
                 <div class="card-body">
                     @if (Model?.CartItems != null && Model.CartItems.Any())
                     {
